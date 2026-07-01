@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>🐷 Gestão de Lotes - Marcelo (com select de fases)</title>
+
+  <!-- PWA: instalação no iPhone/Android -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2c6e49">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Lotes Marcelo">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="icon" href="icon-192.png" type="image/png">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f0;
+      color: #1e2a2f;
+      padding: 16px;
+      font-size: 18px;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 24px;
+      padding: 24px 28px 40px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+    h1 { font-size: 36px; }
+    h2 { font-size: 30px; }
+    h3 { font-size: 26px; }
+
+    /* ─── LOGIN ─── */
+    #login-screen {
+      max-width: 500px;
+      margin: 80px auto;
+      background: #fff;
+      padding: 40px 32px;
+      border-radius: 24px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    #login-screen .logo { font-size: 80px; }
+    #login-screen h2 { font-size: 34px; }
+    .campo {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .campo label { font-size: 22px; font-weight: 700; }
+    .campo input {
+      padding: 16px 20px;
+      border-radius: 14px;
+      border: 2px solid #c0cdcd;
+      font-size: 24px;
+      background: #fafafa;
+      outline: none;
+    }
+    .btn-grande {
+      padding: 18px 32px;
+      border: none;
+      border-radius: 16px;
+      font-size: 26px;
+      font-weight: 800;
+      cursor: pointer;
+      background: #2c6e49;
+      color: #fff;
+      width: 100%;
+    }
+    .btn-grande:hover { background: #1f5236; }
+
+    /* ─── HEADER ─── */
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid #e2e8ed;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .header-left .logo { font-size: 52px; }
+    .header-left h1 { font-size: 34px; }
+    .header-left .sub { font-size: 20px; color: #6b7a7a; }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: #f0f3f5;
+      padding: 8px 18px 8px 24px;
+      border-radius: 40px;
+      flex-wrap: wrap;
+    }
+    .header-right label { font-size: 20px; font-weight: 700; color: #3d5353; }
+    .header-right select {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 30px;
+      font-size: 22px;
+      font-weight: 700;
+      background: #fff;
+      cursor: pointer;
+    }
+    .btn-sair {
+      background: transparent;
+      border: 2px solid #b53b3b;
+      color: #b53b3b;
+      border-radius: 30px;
+      padding: 8px 24px;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-sair:hover { background: #b53b3b; color: #fff; }
+
+    /* ─── TABS ─── */
+    .tabs {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #e2e8ed;
+      padding-bottom: 4px;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 14px 32px;
+      font-size: 24px;
+      font-weight: 700;
+      color: #5f7373;
+      cursor: pointer;
+      border-radius: 14px 14px 0 0;
+    }
+    .tab-btn.active {
+      background: #eef3f0;
+      color: #1e3b2e;
+      border-bottom: 4px solid #2c6e49;
+    }
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* ─── CARDS ─── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .card {
+      background: #fafcfe;
+      border-radius: 18px;
+      padding: 22px 26px;
+      border-left: 6px solid #2c6e49;
+      border: 1px solid #e2e8ed;
+    }
+    .card .label {
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #718787;
+      font-weight: 700;
+    }
+    .card .value {
+      font-size: 42px;
+      font-weight: 800;
+      color: #14241e;
+    }
+    .card .sub {
+      font-size: 18px;
+      color: #8a9b9b;
+      margin-top: 6px;
+    }
+    .card.warning { border-left-color: #d4a017; }
+    .card.danger { border-left-color: #b53b3b; }
+    .card.info { border-left-color: #2b6f9e; }
+
+    /* ─── TABELAS ─── */
+    .table-wrap {
+      background: #fff;
+      border-radius: 18px;
+      border: 1px solid #e2e8ed;
+      overflow-x: auto;
+      margin-bottom: 24px;
+      padding: 0 8px 8px 8px;
+    }
+    .table-wrap .title {
+      font-size: 26px;
+      font-weight: 700;
+      padding: 20px 24px 10px 24px;
+      color: #1e2a2f;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 22px;
+    }
+    th, td {
+      padding: 16px 20px;
+      text-align: left;
+      border-bottom: 1px solid #edf2f5;
+    }
+    th {
+      background: #f6f9fa;
+      color: #3d5353;
+      font-weight: 700;
+      font-size: 20px;
+      text-transform: uppercase;
+    }
+    td input, td select {
+      font-size: 22px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 2px solid #d0d9dd;
+      background: #fafafa;
+      width: 100%;
+      outline: none;
+    }
+    td input:focus, td select:focus { border-color: #2c6e49; }
+    .badge {
+      display: inline-block;
+      padding: 6px 18px;
+      border-radius: 40px;
+      font-size: 20px;
+      font-weight: 700;
+      background: #e6edf0;
+      color: #3d5353;
+    }
+
+    /* ─── FORMULÁRIO RÁPIDO DE LANÇAMENTO ─── */
+    .form-rapido {
+      background: #f6f9fa;
+      border-radius: 18px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+      border: 2px dashed #c0cdcd;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 20px;
+    }
+    .form-rapido .campo-form {
+      flex: 1 1 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .form-rapido .campo-form label {
+      font-size: 20px;
+      font-weight: 700;
+      color: #4b6262;
+    }
+    .form-rapido .campo-form input,
+    .form-rapido .campo-form select {
+      padding: 16px 20px;
+      border-radius: 14px;
+      border: 2px solid #d0d9dd;
+      font-size: 22px;
+      background: #fff;
+      outline: none;
+      width: 100%;
+    }
+    .form-rapido .btn-acao {
+      margin: 0;
+      padding: 16px 32px;
+      font-size: 24px;
+    }
+
+    /* ─── OUTROS BOTÕES ─── */
+    .btn-acao {
+      padding: 16px 32px;
+      border: none;
+      border-radius: 14px;
+      font-size: 24px;
+      font-weight: 800;
+      cursor: pointer;
+      background: #2c6e49;
+      color: #fff;
+      margin: 6px 0;
+    }
+    .btn-acao:hover { background: #1f5236; }
+    .btn-acao.secondary { background: #e6edf0; color: #2d4040; }
+    .btn-acao.secondary:hover { background: #d0d9dd; }
+    .btn-acao.danger { background: #b53b3b; }
+    .btn-acao.danger:hover { background: #8a2e2e; }
+
+    /* ─── RELATÓRIO ─── */
+    .report-box {
+      background: #fafcfc;
+      border-radius: 18px;
+      padding: 30px;
+      border: 1px solid #e2e8ed;
+      font-size: 22px;
+    }
+    .report-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .report-item {
+      background: #fff;
+      padding: 20px 24px;
+      border-radius: 16px;
+      border: 1px solid #e6edf0;
+    }
+    .report-item .label { font-size: 18px; color: #6b7a7a; font-weight: 600; }
+    .report-item .value { font-size: 36px; font-weight: 800; color: #1e2a2f; }
+
+    .flash {
+      padding: 18px 26px;
+      border-radius: 16px;
+      font-weight: 700;
+      font-size: 24px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .flash.ok { background: #dff0e4; color: #1f5236; display: block; border-left: 6px solid #2c6e49; }
+    .flash.err { background: #f5dddd; color: #8a2e2e; display: block; border-left: 6px solid #b53b3b; }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { font-size: 14px; }
+      .container { box-shadow: none; padding: 0; }
+      .card .value { font-size: 28px; }
+    }
+    @media (max-width: 700px) {
+      body { font-size: 16px; padding: 8px; }
+      .container { padding: 16px; }
+      h1 { font-size: 28px; }
+      .card .value { font-size: 30px; }
+      .tab-btn { font-size: 20px; padding: 10px 18px; }
+      table { font-size: 18px; }
+      th, td { padding: 12px 14px; }
+      .btn-grande { font-size: 22px; }
+      .form-rapido { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <!-- LOGIN -->
+  <div id="login-screen" class="no-print">
+    <div class="logo">🐷</div>
+    <h2>Gestão de Lotes</h2>
+    <div style="font-size:22px;color:#6b7a7a;">Parceiro: Marcelo Bordão</div>
+    <div class="campo">
+      <label>Usuário</label>
+      <input type="text" id="login-user" value="marcelo">
+    </div>
+    <div class="campo">
+      <label>Senha</label>
+      <input type="password" id="login-pass" value="123456">
+    </div>
+    <button class="btn-grande" onclick="login()">🔓 ENTRAR</button>
+    <p style="margin-top:16px;color:#8a9b9b;font-size:18px;">Usuário: marcelo | Senha: 123456</p>
+  </div>
+
+  <!-- SISTEMA -->
+  <div id="system" style="display:none;">
+    <div class="container">
+      <!-- HEADER -->
+      <div class="header">
+        <div class="header-left">
+          <span class="logo">🐷</span>
+          <div>
+            <h1>Gestão de Lotes</h1>
+            <div class="sub" id="header-sub">Parceiro: Marcelo Bordão</div>
+          </div>
+        </div>
+        <div class="header-right no-print">
+          <label for="lote-select">📂 Lote</label>
+          <select id="lote-select" onchange="trocarLote()"></select>
+          <button class="btn-sair" onclick="logout()">Sair</button>
+        </div>
+      </div>
+
+      <div id="flash" class="flash"></div>
+
+      <!-- TABS -->
+      <div class="tabs no-print">
+        <button class="tab-btn active" onclick="showTab('painel', this)">📊 Painel</button>
+        <button class="tab-btn" onclick="showTab('lancamentos', this)">📦 Lançamentos</button>
+        <button class="tab-btn" onclick="showTab('fases', this)">📋 Fases</button>
+        <button class="tab-btn" onclick="showTab('medicacao', this)">💊 Medicação</button>
+        <button class="tab-btn" onclick="showTab('relatorios', this)">📈 Relatórios</button>
+        <button class="tab-btn" onclick="showTab('config', this)">⚙️ Config</button>
+      </div>
+
+      <!-- PAINEL -->
+      <div id="tab-painel" class="section active">
+        <div class="cards-grid" id="cards-painel"></div>
+        <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+          <button class="btn-acao" onclick="showTab('lancamentos', document.querySelector('.tab-btn:nth-child(2)'))">📦 Lançar Ração</button>
+          <button class="btn-acao secondary" onclick="gerarRelatorioPeriodo('mensal')">📅 Relatório Mensal</button>
+        </div>
+        <div class="table-wrap">
+          <div class="title">🕐 Últimos Lançamentos</div>
+          <table>
+            <thead><tr><th>Data</th><th>Fase</th><th>Kg Ração</th></tr></thead>
+            <tbody id="ultimos-lancamentos"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- LANÇAMENTOS -->
+      <div id="tab-lancamentos" class="section">
+        <div class="form-rapido">
+          <div class="campo-form">
+            <label>📅 Data</label>
+            <input type="date" id="nova-data" value="">
+          </div>
+          <div class="campo-form">
+            <label>📂 Fase</label>
+            <select id="nova-fase">
+              <option value="Pré I">Pré I</option>
+              <option value="Pré II">Pré II</option>
+              <option value="Inicial I">Inicial I</option>
+              <option value="Inicial II">Inicial II</option>
+              <option value="Recria MD5">Recria MD5</option>
+              <option value="Recria">Recria</option>
+              <option value="Terminação MD7">Terminação MD7</option>
+              <option value="Final MD9">Final MD9</option>
+              <option value="Final">Final</option>
+              <option value="Outra">Outra (digitar)</option>
+            </select>
+          </div>
+          <div class="campo-form" id="campo-outra-fase" style="display:none;">
+            <label>✏️ Digite a fase</label>
+            <input type="text" id="nova-fase-outra" placeholder="Ex: Pré I">
+          </div>
+          <div class="campo-form">
+            <label>⚖️ Quantidade (kg)</label>
+            <input type="number" id="nova-qtd" step="1" value="100">
+          </div>
+          <button class="btn-acao" onclick="salvarLancamentoRapido()">➕ Salvar</button>
+        </div>
+
+        <div class="table-wrap">
+          <div class="title">📦 Lançamentos</div>
+          <table>
+            <thead><tr>
+              <th>Data</th>
+              <th>Fase</th>
+              <th>Quantidade (kg)</th>
+              <th style="width:80px;">Ações</th>
+            </tr></thead>
+            <tbody id="lancamentos-tbody"></tbody>
+            <tfoot id="lancamentos-tfoot" style="font-weight:700;background:#f6f9fa;"></tfoot>
+          </table>
+        </div>
+        <div style="display:flex; gap:16px; flex-wrap:wrap;">
+          <button class="btn-acao secondary" onclick="recalcularTudo()">🔄 Recalcular Totais</button>
+        </div>
+      </div>
+
+      <!-- FASES (consolidado) -->
+      <div id="tab-fases" class="section">
+        <div class="table-wrap">
+          <div class="title">📋 Consolidação por Fase</div>
+          <table>
+            <thead><tr>
+              <th>Fase</th>
+              <th>Total Realizado (kg)</th>
+              <th>Previsto (kg)</th>
+              <th>Diferença</th>
+            </tr></thead>
+            <tbody id="fases-consolidadas"></tbody>
+            <tfoot id="fases-tfoot" style="font-weight:700;background:#f6f9fa;"></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- MEDICAÇÃO -->
+      <div id="tab-medicacao" class="section">
+        <div class="table-wrap">
+          <div class="title">💊 Medicação / Kg Ração</div>
+          <table>
+            <thead><tr>
+              <th>Medicamento</th>
+              <th>Período Início</th>
+              <th>Período Fim</th>
+              <th>Realizado (kg)</th>
+              <th>Previsto (kg)</th>
+              <th>Diferença</th>
+              <th>Controle</th>
+            </tr></thead>
+            <tbody id="medic-tbody"></tbody>
+            <tfoot id="medic-tfoot" style="font-weight:700;background:#f6f9fa;"></tfoot>
+          </table>
+        </div>
+        <button class="btn-acao" onclick="recalcularMedicacao()">🔄 Recalcular Medicados</button>
+      </div>
+
+      <!-- RELATÓRIOS -->
+      <div id="tab-relatorios" class="section">
+        <div class="no-print" style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+          <button class="btn-acao" onclick="gerarRelatorioPeriodo('mensal')">📅 Relatório Mensal</button>
+          <button class="btn-acao" onclick="gerarRelatorioPeriodo('semestral')">📅 Relatório Semestral</button>
+          <button class="btn-acao secondary" onclick="window.print()">🖨️ Imprimir</button>
+        </div>
+        <div class="report-box" id="report-output">
+          <p style="color:#718787;font-size:24px;">Clique em um botão para gerar o relatório.</p>
+        </div>
+      </div>
+
+      <!-- CONFIG -->
+      <div id="tab-config" class="section">
+        <div class="table-wrap">
+          <div class="title">⚙️ Configurações do Lote</div>
+          <div class="form-grid">
+            <div class="campo-form">
+              <label>Nome do Parceiro</label>
+              <input type="text" id="cfg-parceiro">
+            </div>
+            <div class="campo-form">
+              <label>Número do Lote</label>
+              <input type="text" id="cfg-numero">
+            </div>
+            <div class="campo-form">
+              <label>Data de Entrada</label>
+              <input type="date" id="cfg-dataEntrada">
+            </div>
+            <div class="campo-form">
+              <label>Data de Saída (prevista)</label>
+              <input type="date" id="cfg-dataSaida">
+            </div>
+            <div class="campo-form">
+              <label>Peso de Entrada (kg)</label>
+              <input type="number" step="0.1" id="cfg-pesoEntrada" placeholder="ex: 7.3">
+            </div>
+            <div class="campo-form">
+              <label>Peso Esperado de Venda (kg)</label>
+              <input type="number" step="0.1" id="cfg-pesoVenda" placeholder="ex: 125">
+            </div>
+            <div class="campo-form">
+              <label>Idade na Entrada (dias)</label>
+              <input type="number" step="1" id="cfg-idadeEntrada" placeholder="ex: 31">
+            </div>
+          </div>
+          <button class="btn-acao" onclick="salvarConfigLote()">💾 Salvar Configurações</button>
+        </div>
+        <div style="margin-top:20px; display:flex; gap:16px; flex-wrap:wrap;">
+          <button class="btn-acao" onclick="novoLote()">📦 Criar Novo Lote</button>
+          <button class="btn-acao danger" onclick="excluirLote()">🗑️ Excluir Lote Atual</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── BANCO DE DADOS ──────────────────────────────────────────────────────────
+const DB_KEY = 'marcelo_lotes_v5';
+let db = loadDB();
+let loteAtualId = null;
+
+function loadDB() {
+  try { const raw = localStorage.getItem(DB_KEY); if (raw) return JSON.parse(raw); } catch {}
+  return { lotes: [], nextLoteId: 1, nextLancId: 1, nextMedicId: 1 };
+}
+function saveDB() { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+
+// ─── LOGIN ────────────────────────────────────────────────────────────────────
+function login() {
+  const user = document.getElementById('login-user').value;
+  const pass = document.getElementById('login-pass').value;
+  if (user === 'marcelo' && pass === '123456') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('system').style.display = 'block';
+    iniciarSistema();
+  } else {
+    alert('Usuário ou senha incorretos.');
+  }
+}
+function logout() {
+  document.getElementById('system').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'block';
+}
+
+// ─── DADOS DO LOTE 37 ────────────────────────────────────────────────────────
+function criarLote37() {
+  function parseData(str) {
+    const meses = { 'jan':'01','fev':'02','mar':'03','abr':'04','mai':'05','jun':'06','jul':'07','ago':'08','set':'09','out':'10','nov':'11','dez':'12' };
+    const partes = str.trim().split('/');
+    if (partes.length !== 2) return '';
+    const dia = partes[0].padStart(2,'0');
+    const mes = meses[partes[1].toLowerCase()] || '01';
+    return `2026-${mes}-${dia}`;
+  }
+
+  const lancamentos = [
+    { data: '12/fev', fase: 'Pré I', quantidade: 12240 },
+    { data: '12/fev', fase: 'Pré II', quantidade: 4920 },
+    { data: '26/fev', fase: 'Pré II', quantidade: 17040 },
+    { data: '27/fev', fase: 'Pré II', quantidade: 16940 },
+    { data: '12/mar', fase: 'Pré II', quantidade: 5980 },
+    { data: '12/mar', fase: 'Inicial II', quantidade: 11490 },
+    { data: '17/mar', fase: 'Inicial II', quantidade: 19010 },
+    { data: '19/mar', fase: 'Inicial II', quantidade: 17550 },
+    { data: '21/mar', fase: 'Inicial II', quantidade: 17650 },
+    { data: '24/mar', fase: 'Inicial II', quantidade: 17410 },
+    { data: '26/mar', fase: 'Inicial II', quantidade: 17680 },
+    { data: '28/mar', fase: 'Inicial II', quantidade: 18070 },
+    { data: '31/mar', fase: 'Inicial II', quantidade: 5750 },
+    { data: '31/mar', fase: 'Recria MD5', quantidade: 12160 },
+    { data: '02/abr', fase: 'Recria MD5', quantidade: 18210 },
+    { data: '04/abr', fase: 'Recria MD5', quantidade: 18400 },
+    { data: '07/abr', fase: 'Recria MD5', quantidade: 18050 },
+    { data: '10/abr', fase: 'Recria MD5', quantidade: 17770 },
+    { data: '11/abr', fase: 'Recria MD5', quantidade: 18130 },
+    { data: '13/mai', fase: 'Recria MD5', quantidade: 18080 },
+    { data: '17/abr', fase: 'Recria MD5', quantidade: 18110 },
+    { data: '04/mai', fase: 'Recria MD5', quantidade: 18510 },
+    { data: '05/mai', fase: 'Recria MD5', quantidade: 18590 },
+    { data: '06/mai', fase: 'Recria MD5', quantidade: 18040 },
+    { data: '07/mai', fase: 'Recria MD5', quantidade: 18360 },
+    { data: '08/mai', fase: 'Recria MD5', quantidade: 18180 },
+    { data: '09/mai', fase: 'Recria MD5', quantidade: 18320 },
+    { data: '11/mai', fase: 'Recria MD5', quantidade: 18210 },
+    { data: '12/mai', fase: 'Recria MD5', quantidade: 18120 },
+    { data: '13/mai', fase: 'Recria MD5', quantidade: 18530 },
+    { data: '13/mai', fase: 'Recria MD5', quantidade: 18640 },
+    { data: '15/mai', fase: 'Recria MD5', quantidade: 18130 },
+    { data: '13/abr', fase: 'Recria', quantidade: 17910 },
+    { data: '17/abr', fase: 'Recria', quantidade: 18820 },
+    { data: '20/abr', fase: 'Recria', quantidade: 17880 },
+    { data: '21/abr', fase: 'Recria', quantidade: 19130 },
+    { data: '23/abr', fase: 'Recria', quantidade: 19020 },
+    { data: '23/abr', fase: 'Recria', quantidade: 17800 },
+    { data: '27/abr', fase: 'Recria', quantidade: 18010 },
+    { data: '27/abr', fase: 'Recria', quantidade: 19160 },
+    { data: '29/abr', fase: 'Recria', quantidade: 16960 },
+    { data: '01/mai', fase: 'Recria', quantidade: 17840 },
+    { data: '02/mai', fase: 'Recria', quantidade: 17740 },
+    { data: '15/mai', fase: 'Recria', quantidade: 15860 },
+    { data: '16/mai', fase: 'Recria', quantidade: 19360 },
+    { data: '18/mai', fase: 'Recria', quantidade: 18180 },
+    { data: '19/mai', fase: 'Recria', quantidade: 17840 },
+    { data: '20/mai', fase: 'Recria', quantidade: 19380 },
+    { data: '21/mai', fase: 'Recria', quantidade: 18600 },
+    { data: '22/mai', fase: 'Recria', quantidade: 19350 },
+    { data: '25/mai', fase: 'Recria', quantidade: 19280 },
+    { data: '27/mai', fase: 'Terminação MD7', quantidade: 12770 },
+    { data: '27/mai', fase: 'Terminação MD7', quantidade: 19180 },
+    { data: '28/mai', fase: 'Terminação MD7', quantidade: 17860 },
+    { data: '29/mai', fase: 'Terminação MD7', quantidade: 17780 },
+    { data: '30/mai', fase: 'Terminação MD7', quantidade: 18090 },
+    { data: '01/jun', fase: 'Terminação MD7', quantidade: 17730 },
+    { data: '02/jun', fase: 'Terminação MD7', quantidade: 17660 },
+    { data: '03/jun', fase: 'Terminação MD7', quantidade: 11570 },
+    { data: '04/jun', fase: 'Terminação MD7', quantidade: 17570 },
+    { data: '05/jun', fase: 'Terminação MD7', quantidade: 17720 },
+    { data: '06/jun', fase: 'Terminação MD7', quantidade: 17770 },
+    { data: '06/jun', fase: 'Terminação MD7', quantidade: 18010 },
+    { data: '11/jun', fase: 'Final MD9', quantidade: 18420 },
+    { data: '08/jun', fase: 'Final', quantidade: 18230 },
+    { data: '09/jun', fase: 'Final', quantidade: 18280 },
+    { data: '10/jun', fase: 'Final', quantidade: 17940 },
+    { data: '10/jun', fase: 'Final', quantidade: 18380 },
+    { data: '10/jun', fase: 'Final', quantidade: 18480 },
+    { data: '13/jun', fase: 'Final', quantidade: 17990 },
+    { data: '15/jun', fase: 'Final', quantidade: 18430 },
+    { data: '16/jun', fase: 'Final', quantidade: 18170 },
+    { data: '17/jun', fase: 'Final', quantidade: 18460 },
+    { data: '17/jun', fase: 'Final', quantidade: 17670 },
+    { data: '18/jun', fase: 'Final', quantidade: 18290 },
+    { data: '19/jun', fase: 'Final', quantidade: 18460 },
+    { data: '20/jun', fase: 'Final', quantidade: 17910 },
+    { data: '22/jun', fase: 'Final', quantidade: 17460 },
+    { data: '24/jun', fase: 'Final', quantidade: 17720 }
+  ];
+
+  lancamentos.forEach(l => l.data = parseData(l.data));
+
+  const medicacoes = [
+    { nome: 'MD01', periodoIni: '2026-02-12', periodoFim: '2026-02-21', realizado: 12240, previsto: 10737 },
+    { nome: 'MD02', periodoIni: '2026-02-22', periodoFim: '2026-03-03', realizado: 44880, previsto: 42948 },
+    { nome: 'Fase 03', periodoIni: '', periodoFim: '', realizado: 0, previsto: 0 },
+    { nome: 'MD04', periodoIni: '2026-03-04', periodoFim: '2026-03-13', realizado: 124610, previsto: 42948 },
+    { nome: 'Fase 04', periodoIni: '', periodoFim: '', realizado: 0, previsto: 71580 },
+    { nome: 'MD05', periodoIni: '2026-03-14', periodoFim: '2026-03-23', realizado: 102720, previsto: 120000 },
+    { nome: 'Recria', periodoIni: '2026-03-24', periodoFim: '2026-04-02', realizado: 200270, previsto: 192000 },
+    { nome: 'MD05', periodoIni: '2026-04-03', periodoFim: '2026-04-12', realizado: 237820, previsto: 180000 },
+    { nome: 'Recria', periodoIni: '2026-04-13', periodoFim: '2026-04-22', realizado: 147850, previsto: 162000 },
+    { nome: 'MD7', periodoIni: '2026-04-23', periodoFim: '2026-05-02', realizado: 203710, previsto: 162000 },
+    { nome: 'Final', periodoIni: '2026-05-03', periodoFim: '2026-06-12', realizado: 0, previsto: 0 }
+  ];
+
+  const lote = {
+    id: db.nextLoteId++,
+    parceiro: 'Marcelo Bordão',
+    numero: '37',
+    dataEntrada: '2026-02-12',
+    dataSaida: '2026-06-24',
+    pesoEntrada: 7.3,
+    pesoVenda: 125,
+    idadeEntrada: 31,
+    lancamentos: lancamentos,
+    medicacoes: medicacoes
+  };
+  return lote;
+}
+
+// ─── INICIALIZAÇÃO ───────────────────────────────────────────────────────────
+function iniciarSistema() {
+  if (db.lotes.length === 0) {
+    const lote37 = criarLote37();
+    db.lotes.push(lote37);
+    saveDB();
+  }
+  loteAtualId = db.lotes[0].id;
+  // Configurar data padrão no formulário rápido
+  const hoje = new Date().toISOString().slice(0,10);
+  document.getElementById('nova-data').value = hoje;
+  // Evento para mostrar campo "Outra"
+  document.getElementById('nova-fase').addEventListener('change', function() {
+    const outro = document.getElementById('campo-outra-fase');
+    if (this.value === 'Outra') {
+      outro.style.display = 'block';
+    } else {
+      outro.style.display = 'none';
+    }
+  });
+  renderizarTudo();
+}
+
+function getLoteAtual() {
+  return db.lotes.find(l => l.id === loteAtualId) || null;
+}
+
+// ─── RENDERIZAÇÃO PRINCIPAL ──────────────────────────────────────────────────
+function renderizarTudo() {
+  const lote = getLoteAtual();
+  if (!lote) return;
+
+  const sel = document.getElementById('lote-select');
+  sel.innerHTML = db.lotes.map(l =>
+    `<option value="${l.id}" ${l.id === lote.id ? 'selected' : ''}>${l.parceiro} - Lote ${l.numero}</option>`
+  ).join('');
+
+  document.getElementById('cfg-parceiro').value = lote.parceiro || '';
+  document.getElementById('cfg-numero').value = lote.numero || '';
+  document.getElementById('cfg-dataEntrada').value = lote.dataEntrada || '';
+  document.getElementById('cfg-dataSaida').value = lote.dataSaida || '';
+  document.getElementById('cfg-pesoEntrada').value = lote.pesoEntrada || '';
+  document.getElementById('cfg-pesoVenda').value = lote.pesoVenda || '';
+  document.getElementById('cfg-idadeEntrada').value = lote.idadeEntrada || '';
+
+  renderizarPainel(lote);
+  renderizarLancamentos(lote);
+  renderizarFasesConsolidadas(lote);
+  renderizarMedicacao(lote);
+  renderizarUltimosLancamentos(lote);
+}
+
+// ─── PAINEL ──────────────────────────────────────────────────────────────────
+function renderizarPainel(lote) {
+  const lancamentos = lote.lancamentos || [];
+  const totalRacao = lancamentos.reduce((acc, l) => acc + (Number(l.quantidade) || 0), 0);
+
+  const pesoEntrada = Number(lote.pesoEntrada) || 0;
+  const pesoVenda = Number(lote.pesoVenda) || 0;
+  const dataEntrada = new Date(lote.dataEntrada);
+  const dataSaida = new Date(lote.dataSaida);
+  const hoje = new Date();
+  const diasDecorridos = Math.max(0, Math.floor((hoje - dataEntrada) / (1000 * 60 * 60 * 24)));
+  const diasTotal = Math.max(1, Math.floor((dataSaida - dataEntrada) / (1000 * 60 * 60 * 24)));
+  const ganhoEsperado = pesoVenda - pesoEntrada;
+  const gpd = diasTotal > 0 ? ganhoEsperado / diasTotal : 0;
+  const pesoEstimado = pesoEntrada + (gpd * diasDecorridos);
+  const conversao = ganhoEsperado > 0 ? totalRacao / ganhoEsperado : 0;
+
+  document.getElementById('cards-painel').innerHTML = `
+    <div class="card"><div class="label">🌾 Ração Total (kg)</div><div class="value">${totalRacao.toLocaleString('pt-BR')}</div><div class="sub">${lancamentos.length} lançamentos</div></div>
+    <div class="card info"><div class="label">📈 GPD (kg/dia)</div><div class="value">${gpd.toFixed(3)}</div><div class="sub">Ganho esperado: ${ganhoEsperado.toFixed(1)} kg</div></div>
+    <div class="card ${conversao < 3 ? '' : 'warning'}"><div class="label">🍽️ Conversão</div><div class="value">${conversao.toFixed(2)}</div><div class="sub">kg ração / kg ganho</div></div>
+    <div class="card info"><div class="label">🐷 Peso Estimado (kg)</div><div class="value">${pesoEstimado.toFixed(1)}</div><div class="sub">${diasDecorridos} dias de engorda</div></div>
+  `;
+}
+
+// ─── LANÇAMENTOS ─────────────────────────────────────────────────────────────
+function renderizarLancamentos(lote) {
+  const tbody = document.getElementById('lancamentos-tbody');
+  const tfoot = document.getElementById('lancamentos-tfoot');
+  const lancs = lote.lancamentos || [];
+  if (lancs.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:#8a9b9b;">Nenhum lançamento.</td></tr>';
+    tfoot.innerHTML = '';
+    return;
+  }
+  let html = '';
+  let total = 0;
+  lancs.forEach((l) => {
+    const qtd = Number(l.quantidade) || 0;
+    total += qtd;
+    const fases = ['Pré I', 'Pré II', 'Inicial I', 'Inicial II', 'Recria MD5', 'Recria', 'Terminação MD7', 'Final MD9', 'Final'];
+    const options = fases.map(f => `<option value="${f}" ${f === l.fase ? 'selected' : ''}>${f}</option>`).join('');
+    html += `
+      <tr>
+        <td><input type="date" value="${l.data || ''}" onchange="atualizarLancamento(${l.id}, 'data', this.value)"></td>
+        <td>
+          <select onchange="atualizarLancamento(${l.id}, 'fase', this.value)">
+            ${options}
+            <option value="Outra" ${!fases.includes(l.fase) && l.fase ? 'selected' : ''}>Outra</option>
+          </select>
+          ${!fases.includes(l.fase) && l.fase ? `<input type="text" value="${l.fase}" style="margin-top:4px;" onchange="atualizarLancamento(${l.id}, 'fase', this.value)" placeholder="Digite a fase">` : ''}
+        </td>
+        <td><input type="number" step="1" value="${qtd}" onchange="atualizarLancamento(${l.id}, 'quantidade', this.value)"></td>
+        <td><button class="btn-acao secondary" style="font-size:18px;padding:6px 12px;" onclick="excluirLancamento(${l.id})">🗑️</button></td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
+  tfoot.innerHTML = `<tr><td colspan="2" style="text-align:right;"><strong>TOTAL</strong></td><td><strong>${total.toLocaleString('pt-BR')} kg</strong></td><td></td></tr>`;
+}
+
+// ─── SALVAR LANÇAMENTO RÁPIDO ──────────────────────────────────────────────
+function salvarLancamentoRapido() {
+  const lote = getLoteAtual();
+  if (!lote) { flash('Nenhum lote selecionado.', false); return; }
+
+  const data = document.getElementById('nova-data').value;
+  if (!data) { flash('Informe a data.', false); return; }
+
+  let fase = document.getElementById('nova-fase').value;
+  if (fase === 'Outra') {
+    fase = document.getElementById('nova-fase-outra').value.trim();
+    if (!fase) { flash('Digite o nome da fase.', false); return; }
+  }
+
+  const qtd = Number(document.getElementById('nova-qtd').value);
+  if (!qtd || qtd <= 0) { flash('Informe uma quantidade válida.', false); return; }
+
+  lote.lancamentos.push({
+    id: db.nextLancId++,
+    data: data,
+    fase: fase,
+    quantidade: qtd
+  });
+  saveDB();
+  renderizarTudo();
+  flash('Lançamento salvo!', true);
+}
+
+function atualizarLancamento(id, campo, valor) {
+  const lote = getLoteAtual();
+  if (!lote) return;
+  const lanc = lote.lancamentos.find(l => l.id === id);
+  if (lanc) {
+    lanc[campo] = campo === 'quantidade' ? Number(valor) || 0 : valor;
+    saveDB();
+    renderizarTudo();
+  }
+}
+
+function excluirLancamento(id) {
+  if (!confirm('Excluir este lançamento?')) return;
+  const lote = getLoteAtual();
+  if (!lote) return;
+  lote.lancamentos = lote.lancamentos.filter(l => l.id !== id);
+  saveDB();
+  renderizarTudo();
+}
+
+// ─── FASES CONSOLIDADAS ──────────────────────────────────────────────────────
+function renderizarFasesConsolidadas(lote) {
+  const tbody = document.getElementById('fases-consolidadas');
+  const tfoot = document.getElementById('fases-tfoot');
+  const lancs = lote.lancamentos || [];
+  const fases = {};
+  lancs.forEach(l => {
+    const fase = l.fase || 'Sem fase';
+    if (!fases[fase]) fases[fase] = 0;
+    fases[fase] += Number(l.quantidade) || 0;
+  });
+  const previstos = {
+    'Pré I': 10737,
+    'Pré II': 42948,
+    'Inicial I': 0,
+    'Inicial II': 125265,
+    'Recria MD5': 120000,
+    'Recria': 192000,
+    'Terminação MD7': 162000,
+    'Final MD9': 0,
+    'Final': 600000
+  };
+  const nomesFases = Object.keys(fases).sort();
+  if (nomesFases.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:#8a9b9b;">Nenhuma fase com lançamentos.</td></tr>';
+    tfoot.innerHTML = '';
+    return;
+  }
+  let html = '';
+  let totalReal = 0, totalPrev = 0;
+  nomesFases.forEach(fase => {
+    const real = fases[fase] || 0;
+    const prev = previstos[fase] || 0;
+    totalReal += real;
+    totalPrev += prev;
+    const dif = real - prev;
+    html += `
+      <tr>
+        <td><strong>${fase}</strong></td>
+        <td>${real.toLocaleString('pt-BR')}</td>
+        <td>${prev.toLocaleString('pt-BR')}</td>
+        <td style="font-weight:700;color:${dif >= 0 ? '#1f5236' : '#b53b3b'}">${dif >= 0 ? '+' : ''}${dif.toLocaleString('pt-BR')}</td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
+  const totalDif = totalReal - totalPrev;
+  tfoot.innerHTML = `
+    <tr>
+      <td><strong>TOTAIS</strong></td>
+      <td><strong>${totalReal.toLocaleString('pt-BR')}</strong></td>
+      <td><strong>${totalPrev.toLocaleString('pt-BR')}</strong></td>
+      <td style="font-weight:700;color:${totalDif >= 0 ? '#1f5236' : '#b53b3b'}">${totalDif >= 0 ? '+' : ''}${totalDif.toLocaleString('pt-BR')}</td>
+    </tr>
+  `;
+}
+
+// ─── MEDICAÇÃO ───────────────────────────────────────────────────────────────
+function renderizarMedicacao(lote) {
+  const tbody = document.getElementById('medic-tbody');
+  const tfoot = document.getElementById('medic-tfoot');
+  const meds = lote.medicacoes || [];
+  if (meds.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:#8a9b9b;">Nenhuma medicação cadastrada.</td></tr>';
+    tfoot.innerHTML = '';
+    return;
+  }
+  let html = '';
+  let totalReal = 0, totalPrev = 0;
+  meds.forEach(m => {
+    const real = Number(m.realizado) || 0;
+    const prev = Number(m.previsto) || 0;
+    totalReal += real;
+    totalPrev += prev;
+    const dif = real - prev;
+    const controle = dif >= 0 ? '▲' : '▼';
+    html += `
+      <tr>
+        <td><strong>${m.nome}</strong></td>
+        <td><input type="date" value="${m.periodoIni || ''}" onchange="atualizarMedicacao(${m.id}, 'periodoIni', this.value)"></td>
+        <td><input type="date" value="${m.periodoFim || ''}" onchange="atualizarMedicacao(${m.id}, 'periodoFim', this.value)"></td>
+        <td><input type="number" step="1" value="${real}" onchange="atualizarMedicacao(${m.id}, 'realizado', this.value)"></td>
+        <td><input type="number" step="1" value="${prev}" onchange="atualizarMedicacao(${m.id}, 'previsto', this.value)"></td>
+        <td style="font-weight:700;color:${dif >= 0 ? '#1f5236' : '#b53b3b'}">${dif >= 0 ? '+' : ''}${dif.toLocaleString('pt-BR')}</td>
+        <td>${controle}</td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
+  const totalDif = totalReal - totalPrev;
+  tfoot.innerHTML = `
+    <tr>
+      <td colspan="3" style="text-align:right;"><strong>TOTAIS</strong></td>
+      <td><strong>${totalReal.toLocaleString('pt-BR')}</strong></td>
+      <td><strong>${totalPrev.toLocaleString('pt-BR')}</strong></td>
+      <td style="font-weight:700;color:${totalDif >= 0 ? '#1f5236' : '#b53b3b'}">${totalDif >= 0 ? '+' : ''}${totalDif.toLocaleString('pt-BR')}</td>
+      <td></td>
+    </tr>
+  `;
+}
+
+function atualizarMedicacao(id, campo, valor) {
+  const lote = getLoteAtual();
+  if (!lote) return;
+  const med = lote.medicacoes.find(m => m.id === id);
+  if (med) {
+    med[campo] = campo === 'realizado' || campo === 'previsto' ? Number(valor) || 0 : valor;
+    saveDB();
+    renderizarTudo();
+  }
+}
+
+function recalcularMedicacao() {
+  flash('Medicações recalculadas!', true);
+}
+
+// ─── ÚLTIMOS LANÇAMENTOS ────────────────────────────────────────────────────
+function renderizarUltimosLancamentos(lote) {
+  const tbody = document.getElementById('ultimos-lancamentos');
+  const lancs = lote.lancamentos || [];
+  const ultimos = lancs.slice(-10).reverse();
+  if (ultimos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#8a9b9b;">Nenhum lançamento.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = ultimos.map(l =>
+    `<tr><td>${l.data || ''}</td><td>${l.fase || ''}</td><td>${(Number(l.quantidade)||0).toLocaleString('pt-BR')} kg</td></tr>`
+  ).join('');
+}
+
+// ─── CONFIGURAÇÕES ──────────────────────────────────────────────────────────
+function salvarConfigLote() {
+  const lote = getLoteAtual();
+  if (!lote) return;
+  lote.parceiro = document.getElementById('cfg-parceiro').value;
+  lote.numero = document.getElementById('cfg-numero').value;
+  lote.dataEntrada = document.getElementById('cfg-dataEntrada').value;
+  lote.dataSaida = document.getElementById('cfg-dataSaida').value;
+  lote.pesoEntrada = Number(document.getElementById('cfg-pesoEntrada').value) || 0;
+  lote.pesoVenda = Number(document.getElementById('cfg-pesoVenda').value) || 0;
+  lote.idadeEntrada = Number(document.getElementById('cfg-idadeEntrada').value) || 0;
+  saveDB();
+  renderizarTudo();
+  flash('Configurações salvas!', true);
+}
+
+function novoLote() {
+  if (!confirm('Criar novo lote vazio?')) return;
+  const lote = {
+    id: db.nextLoteId++,
+    parceiro: 'Marcelo Bordão',
+    numero: String(db.nextLoteId),
+    dataEntrada: '',
+    dataSaida: '',
+    pesoEntrada: 0,
+    pesoVenda: 0,
+    idadeEntrada: 0,
+    lancamentos: [],
+    medicacoes: []
+  };
+  db.lotes.push(lote);
+  saveDB();
+  loteAtualId = lote.id;
+  renderizarTudo();
+  flash('Novo lote criado!', true);
+}
+
+function excluirLote() {
+  if (!confirm('Excluir lote atual?')) return;
+  const lote = getLoteAtual();
+  if (!lote) return;
+  db.lotes = db.lotes.filter(l => l.id !== lote.id);
+  loteAtualId = db.lotes.length > 0 ? db.lotes[0].id : null;
+  saveDB();
+  renderizarTudo();
+  flash('Lote excluído.', true);
+}
+
+function trocarLote() {
+  const sel = document.getElementById('lote-select');
+  loteAtualId = Number(sel.value);
+  renderizarTudo();
+}
+
+function recalcularTudo() {
+  renderizarTudo();
+  flash('Recalculado!', true);
+}
+
+// ─── RELATÓRIOS ──────────────────────────────────────────────────────────────
+function gerarRelatorioPeriodo(periodo) {
+  const lote = getLoteAtual();
+  if (!lote) return;
+  const agora = new Date();
+  const dias = periodo === 'mensal' ? 30 : 180;
+  const dataCorte = new Date(agora);
+  dataCorte.setDate(dataCorte.getDate() - dias);
+
+  const lancs = (lote.lancamentos || []).filter(l => {
+    if (!l.data) return false;
+    const d = new Date(l.data);
+    return d >= dataCorte && d <= agora;
+  });
+
+  const totalRacao = lancs.reduce((acc, l) => acc + (Number(l.quantidade) || 0), 0);
+  const totalMedicado = (lote.medicacoes || []).reduce((acc, m) => acc + (Number(m.realizado) || 0), 0);
+  const totalPrevMedic = (lote.medicacoes || []).reduce((acc, m) => acc + (Number(m.previsto) || 0), 0);
+
+  const nomePeriodo = periodo === 'mensal' ? 'Mensal' : 'Semestral';
+  const html = `
+    <h3>📊 Relatório ${nomePeriodo}</h3>
+    <p style="font-size:22px;color:#4b6262;">
+      <strong>Parceiro:</strong> ${lote.parceiro} &nbsp;|&nbsp;
+      <strong>Lote:</strong> ${lote.numero} &nbsp;|&nbsp;
+      <strong>Período:</strong> ${dataCorte.toLocaleDateString('pt-BR')} até ${agora.toLocaleDateString('pt-BR')}
+    </p>
+    <div class="report-grid">
+      <div class="report-item"><div class="label">🌾 Ração (kg)</div><div class="value">${totalRacao.toLocaleString('pt-BR')}</div></div>
+      <div class="report-item"><div class="label">📊 Lançamentos</div><div class="value">${lancs.length}</div></div>
+      <div class="report-item"><div class="label">💊 Medicado (kg)</div><div class="value">${totalMedicado.toLocaleString('pt-BR')}</div></div>
+      <div class="report-item"><div class="label">📈 Previsto Medicado</div><div class="value">${totalPrevMedic.toLocaleString('pt-BR')}</div></div>
+    </div>
+  `;
+  document.getElementById('report-output').innerHTML = html;
+  showTab('relatorios', document.querySelector('.tab-btn:nth-child(5)'));
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function flash(msg, ok) {
+  const el = document.getElementById('flash');
+  el.textContent = msg;
+  el.className = 'flash ' + (ok ? 'ok' : 'err');
+  el.style.display = 'block';
+  clearTimeout(flash._t);
+  flash._t = setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+// ─── PWA: registra service worker para funcionar offline ─────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

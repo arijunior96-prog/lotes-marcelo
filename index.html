@@ -224,17 +224,8 @@
       outline: none;
     }
     td input:focus, td select:focus { border-color: #2c6e49; }
-    .badge {
-      display: inline-block;
-      padding: 6px 18px;
-      border-radius: 40px;
-      font-size: 20px;
-      font-weight: 700;
-      background: #e6edf0;
-      color: #3d5353;
-    }
 
-    /* ─── FORMULÁRIO RÁPIDO DE LANÇAMENTO ─── */
+    /* ─── FORMULÁRIO RÁPIDO ─── */
     .form-rapido {
       background: #f6f9fa;
       border-radius: 18px;
@@ -267,13 +258,8 @@
       outline: none;
       width: 100%;
     }
-    .form-rapido .btn-acao {
-      margin: 0;
-      padding: 16px 32px;
-      font-size: 24px;
-    }
 
-    /* ─── OUTROS BOTÕES ─── */
+    /* ─── BOTÕES ─── */
     .btn-acao {
       padding: 16px 32px;
       border: none;
@@ -391,6 +377,7 @@
         <button class="tab-btn" onclick="showTab('lancamentos', this)">📦 Lançamentos</button>
         <button class="tab-btn" onclick="showTab('fases', this)">📋 Fases</button>
         <button class="tab-btn" onclick="showTab('medicacao', this)">💊 Medicação</button>
+        <button class="tab-btn" onclick="showTab('mortalidade', this)">💀 Mortalidade</button>
         <button class="tab-btn" onclick="showTab('relatorios', this)">📈 Relatórios</button>
         <button class="tab-btn" onclick="showTab('config', this)">⚙️ Config</button>
       </div>
@@ -399,7 +386,7 @@
       <div id="tab-painel" class="section active">
         <div class="cards-grid" id="cards-painel"></div>
         <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
-          <button class="btn-acao" onclick="showTab('lancamentos', document.querySelector('.tab-btn:nth-child(2)'))">📦 Lançar Ração</button>
+          <button class="btn-acao" onclick="showTab('lancamentos', document.querySelectorAll('.tab-btn')[1])">📦 Lançar Ração</button>
           <button class="btn-acao secondary" onclick="gerarRelatorioPeriodo('mensal')">📅 Relatório Mensal</button>
         </div>
         <div class="table-wrap">
@@ -500,6 +487,59 @@
         <button class="btn-acao" onclick="recalcularMedicacao()">🔄 Recalcular Medicados</button>
       </div>
 
+      <!-- MORTALIDADE -->
+      <div id="tab-mortalidade" class="section">
+        <div class="form-rapido">
+          <div class="campo-form">
+            <label>📅 Data</label>
+            <input type="date" id="morte-data" value="">
+          </div>
+          <div class="campo-form">
+            <label>📂 Fase</label>
+            <select id="morte-fase">
+              <option value="Pré I">Pré I</option>
+              <option value="Pré II">Pré II</option>
+              <option value="Inicial I">Inicial I</option>
+              <option value="Inicial II">Inicial II</option>
+              <option value="Recria MD5">Recria MD5</option>
+              <option value="Recria">Recria</option>
+              <option value="Terminação MD7">Terminação MD7</option>
+              <option value="Final MD9">Final MD9</option>
+              <option value="Final">Final</option>
+              <option value="Outra">Outra (digitar)</option>
+            </select>
+          </div>
+          <div class="campo-form" id="campo-outra-fase-morte" style="display:none;">
+            <label>✏️ Digite a fase</label>
+            <input type="text" id="morte-fase-outra" placeholder="Ex: Pré I">
+          </div>
+          <div class="campo-form">
+            <label>💀 Quantidade</label>
+            <input type="number" id="morte-qtd" step="1" value="1" min="1">
+          </div>
+          <div class="campo-form">
+            <label>📝 Motivo (opcional)</label>
+            <input type="text" id="morte-motivo" placeholder="Ex: pneumonia, calor, etc.">
+          </div>
+          <button class="btn-acao danger" onclick="salvarMortalidade()">➕ Registrar</button>
+        </div>
+
+        <div class="table-wrap">
+          <div class="title">💀 Registros de Mortalidade</div>
+          <table>
+            <thead><tr>
+              <th>Data</th>
+              <th>Fase</th>
+              <th>Quantidade</th>
+              <th>Motivo</th>
+              <th style="width:80px;">Ações</th>
+            </tr></thead>
+            <tbody id="mortalidade-tbody"></tbody>
+            <tfoot id="mortalidade-tfoot" style="font-weight:700;background:#f6f9fa;"></tfoot>
+          </table>
+        </div>
+      </div>
+
       <!-- RELATÓRIOS -->
       <div id="tab-relatorios" class="section">
         <div class="no-print" style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
@@ -516,7 +556,7 @@
       <div id="tab-config" class="section">
         <div class="table-wrap">
           <div class="title">⚙️ Configurações do Lote</div>
-          <div class="form-grid">
+          <div class="form-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; padding:20px;">
             <div class="campo-form">
               <label>Nome do Parceiro</label>
               <input type="text" id="cfg-parceiro">
@@ -545,8 +585,12 @@
               <label>Idade na Entrada (dias)</label>
               <input type="number" step="1" id="cfg-idadeEntrada" placeholder="ex: 31">
             </div>
+            <div class="campo-form">
+              <label>🐖 Quantidade de Animais (entrada)</label>
+              <input type="number" step="1" id="cfg-qtdAnimais" placeholder="ex: 1200">
+            </div>
           </div>
-          <button class="btn-acao" onclick="salvarConfigLote()">💾 Salvar Configurações</button>
+          <button class="btn-acao" style="margin:20px;" onclick="salvarConfigLote()">💾 Salvar Configurações</button>
         </div>
         <div style="margin-top:20px; display:flex; gap:16px; flex-wrap:wrap;">
           <button class="btn-acao" onclick="novoLote()">📦 Criar Novo Lote</button>
@@ -566,9 +610,15 @@ let loteAtualId = null;
 
 function loadDB() {
   try { const raw = localStorage.getItem(DB_KEY); if (raw) return JSON.parse(raw); } catch {}
-  return { lotes: [], nextLoteId: 1, nextLancId: 1, nextMedicId: 1 };
+  return { lotes: [], nextLoteId: 1, nextLancId: 1, nextMedicId: 1, nextMorteId: 1 };
 }
 function saveDB() { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+
+function criarDataLocal(strData) {
+  if (!strData) return new Date(NaN);
+  const [ano, mes, dia] = strData.split('-').map(Number);
+  return new Date(ano, mes - 1, dia);
+}
 
 // ─── LOGIN ────────────────────────────────────────────────────────────────────
 function login() {
@@ -680,23 +730,26 @@ function criarLote37() {
     { data: '24/jun', fase: 'Final', quantidade: 17720 }
   ];
 
-  lancamentos.forEach(l => l.data = parseData(l.data));
+  lancamentos.forEach(l => {
+    l.data = parseData(l.data);
+    l.id = db.nextLancId++;
+  });
 
   const medicacoes = [
-    { nome: 'MD01', periodoIni: '2026-02-12', periodoFim: '2026-02-21', realizado: 12240, previsto: 10737 },
-    { nome: 'MD02', periodoIni: '2026-02-22', periodoFim: '2026-03-03', realizado: 44880, previsto: 42948 },
-    { nome: 'Fase 03', periodoIni: '', periodoFim: '', realizado: 0, previsto: 0 },
-    { nome: 'MD04', periodoIni: '2026-03-04', periodoFim: '2026-03-13', realizado: 124610, previsto: 42948 },
-    { nome: 'Fase 04', periodoIni: '', periodoFim: '', realizado: 0, previsto: 71580 },
-    { nome: 'MD05', periodoIni: '2026-03-14', periodoFim: '2026-03-23', realizado: 102720, previsto: 120000 },
-    { nome: 'Recria', periodoIni: '2026-03-24', periodoFim: '2026-04-02', realizado: 200270, previsto: 192000 },
-    { nome: 'MD05', periodoIni: '2026-04-03', periodoFim: '2026-04-12', realizado: 237820, previsto: 180000 },
-    { nome: 'Recria', periodoIni: '2026-04-13', periodoFim: '2026-04-22', realizado: 147850, previsto: 162000 },
-    { nome: 'MD7', periodoIni: '2026-04-23', periodoFim: '2026-05-02', realizado: 203710, previsto: 162000 },
-    { nome: 'Final', periodoIni: '2026-05-03', periodoFim: '2026-06-12', realizado: 0, previsto: 0 }
+    { id: db.nextMedicId++, nome: 'MD01', periodoIni: '2026-02-12', periodoFim: '2026-02-21', realizado: 12240, previsto: 10737 },
+    { id: db.nextMedicId++, nome: 'MD02', periodoIni: '2026-02-22', periodoFim: '2026-03-03', realizado: 44880, previsto: 42948 },
+    { id: db.nextMedicId++, nome: 'Fase 03', periodoIni: '', periodoFim: '', realizado: 0, previsto: 0 },
+    { id: db.nextMedicId++, nome: 'MD04', periodoIni: '2026-03-04', periodoFim: '2026-03-13', realizado: 124610, previsto: 42948 },
+    { id: db.nextMedicId++, nome: 'Fase 04', periodoIni: '', periodoFim: '', realizado: 0, previsto: 71580 },
+    { id: db.nextMedicId++, nome: 'MD05', periodoIni: '2026-03-14', periodoFim: '2026-03-23', realizado: 102720, previsto: 120000 },
+    { id: db.nextMedicId++, nome: 'Recria', periodoIni: '2026-03-24', periodoFim: '2026-04-02', realizado: 200270, previsto: 192000 },
+    { id: db.nextMedicId++, nome: 'MD05', periodoIni: '2026-04-03', periodoFim: '2026-04-12', realizado: 237820, previsto: 180000 },
+    { id: db.nextMedicId++, nome: 'Recria', periodoIni: '2026-04-13', periodoFim: '2026-04-22', realizado: 147850, previsto: 162000 },
+    { id: db.nextMedicId++, nome: 'MD7', periodoIni: '2026-04-23', periodoFim: '2026-05-02', realizado: 203710, previsto: 162000 },
+    { id: db.nextMedicId++, nome: 'Final', periodoIni: '2026-05-03', periodoFim: '2026-06-12', realizado: 0, previsto: 0 }
   ];
 
-  const lote = {
+  return {
     id: db.nextLoteId++,
     parceiro: 'Marcelo Bordão',
     numero: '37',
@@ -705,10 +758,11 @@ function criarLote37() {
     pesoEntrada: 7.3,
     pesoVenda: 125,
     idadeEntrada: 31,
+    quantidadeAnimais: 1200,
     lancamentos: lancamentos,
-    medicacoes: medicacoes
+    medicacoes: medicacoes,
+    mortes: []
   };
-  return lote;
 }
 
 // ─── INICIALIZAÇÃO ───────────────────────────────────────────────────────────
@@ -718,19 +772,28 @@ function iniciarSistema() {
     db.lotes.push(lote37);
     saveDB();
   }
+
+  db.nextMorteId = db.nextMorteId || 1;
+  db.lotes.forEach(l => {
+    if (!Array.isArray(l.mortes)) l.mortes = [];
+    if (typeof l.quantidadeAnimais !== 'number') l.quantidadeAnimais = 0;
+    (l.lancamentos || []).forEach(lanc => { if (!lanc.id) lanc.id = db.nextLancId++; });
+  });
+  saveDB();
+
   loteAtualId = db.lotes[0].id;
-  // Configurar data padrão no formulário rápido
   const hoje = new Date().toISOString().slice(0,10);
   document.getElementById('nova-data').value = hoje;
-  // Evento para mostrar campo "Outra"
+  document.getElementById('morte-data').value = hoje;
+
   document.getElementById('nova-fase').addEventListener('change', function() {
-    const outro = document.getElementById('campo-outra-fase');
-    if (this.value === 'Outra') {
-      outro.style.display = 'block';
-    } else {
-      outro.style.display = 'none';
-    }
+    document.getElementById('campo-outra-fase').style.display = this.value === 'Outra' ? 'block' : 'none';
   });
+
+  document.getElementById('morte-fase').addEventListener('change', function() {
+    document.getElementById('campo-outra-fase-morte').style.display = this.value === 'Outra' ? 'block' : 'none';
+  });
+
   renderizarTudo();
 }
 
@@ -755,11 +818,13 @@ function renderizarTudo() {
   document.getElementById('cfg-pesoEntrada').value = lote.pesoEntrada || '';
   document.getElementById('cfg-pesoVenda').value = lote.pesoVenda || '';
   document.getElementById('cfg-idadeEntrada').value = lote.idadeEntrada || '';
+  document.getElementById('cfg-qtdAnimais').value = lote.quantidadeAnimais || '';
 
   renderizarPainel(lote);
   renderizarLancamentos(lote);
   renderizarFasesConsolidadas(lote);
   renderizarMedicacao(lote);
+  renderizarMortalidade(lote);
   renderizarUltimosLancamentos(lote);
 }
 
@@ -770,21 +835,32 @@ function renderizarPainel(lote) {
 
   const pesoEntrada = Number(lote.pesoEntrada) || 0;
   const pesoVenda = Number(lote.pesoVenda) || 0;
-  const dataEntrada = new Date(lote.dataEntrada);
-  const dataSaida = new Date(lote.dataSaida);
+  const dataEntrada = criarDataLocal(lote.dataEntrada);
+  const dataSaida = criarDataLocal(lote.dataSaida);
   const hoje = new Date();
+  
   const diasDecorridos = Math.max(0, Math.floor((hoje - dataEntrada) / (1000 * 60 * 60 * 24)));
   const diasTotal = Math.max(1, Math.floor((dataSaida - dataEntrada) / (1000 * 60 * 60 * 24)));
   const ganhoEsperado = pesoVenda - pesoEntrada;
   const gpd = diasTotal > 0 ? ganhoEsperado / diasTotal : 0;
   const pesoEstimado = pesoEntrada + (gpd * diasDecorridos);
-  const conversao = ganhoEsperado > 0 ? totalRacao / ganhoEsperado : 0;
+
+  const mortes = lote.mortes || [];
+  const totalMortos = mortes.reduce((acc, m) => acc + (Number(m.quantidade) || 0), 0);
+  const qtdAnimaisEntrada = Number(lote.quantidadeAnimais) || 0;
+  const animaisVivos = Math.max(0, qtdAnimaisEntrada - totalMortos);
+  const taxaMortalidade = qtdAnimaisEntrada > 0 ? (totalMortos / qtdAnimaisEntrada) * 100 : 0;
+
+  const ganhoTotalLote = ganhoEsperado * animaisVivos;
+  const conversao = ganhoTotalLote > 0 ? totalRacao / ganhoTotalLote : 0;
 
   document.getElementById('cards-painel').innerHTML = `
     <div class="card"><div class="label">🌾 Ração Total (kg)</div><div class="value">${totalRacao.toLocaleString('pt-BR')}</div><div class="sub">${lancamentos.length} lançamentos</div></div>
     <div class="card info"><div class="label">📈 GPD (kg/dia)</div><div class="value">${gpd.toFixed(3)}</div><div class="sub">Ganho esperado: ${ganhoEsperado.toFixed(1)} kg</div></div>
-    <div class="card ${conversao < 3 ? '' : 'warning'}"><div class="label">🍽️ Conversão</div><div class="value">${conversao.toFixed(2)}</div><div class="sub">kg ração / kg ganho</div></div>
+    <div class="card ${conversao < 3 ? '' : 'warning'}"><div class="label">🍽️ Conversão</div><div class="value">${conversao.toFixed(2)}</div><div class="sub">kg ração / kg ganho (considera mortes)</div></div>
     <div class="card info"><div class="label">🐷 Peso Estimado (kg)</div><div class="value">${pesoEstimado.toFixed(1)}</div><div class="sub">${diasDecorridos} dias de engorda</div></div>
+    <div class="card info"><div class="label">🐖 Animais Vivos</div><div class="value">${animaisVivos.toLocaleString('pt-BR')}</div><div class="sub">de ${qtdAnimaisEntrada.toLocaleString('pt-BR')} na entrada</div></div>
+    <div class="card ${taxaMortalidade > 5 ? 'warning' : ''}"><div class="label">💀 Mortalidade</div><div class="value">${taxaMortalidade.toFixed(1)}%</div><div class="sub">${totalMortos.toLocaleString('pt-BR')} animais perdidos</div></div>
   `;
 }
 
@@ -824,7 +900,6 @@ function renderizarLancamentos(lote) {
   tfoot.innerHTML = `<tr><td colspan="2" style="text-align:right;"><strong>TOTAL</strong></td><td><strong>${total.toLocaleString('pt-BR')} kg</strong></td><td></td></tr>`;
 }
 
-// ─── SALVAR LANÇAMENTO RÁPIDO ──────────────────────────────────────────────
 function salvarLancamentoRapido() {
   const lote = getLoteAtual();
   if (!lote) { flash('Nenhum lote selecionado.', false); return; }
@@ -891,8 +966,8 @@ function renderizarFasesConsolidadas(lote) {
     'Recria MD5': 120000,
     'Recria': 192000,
     'Terminação MD7': 162000,
-    'Final MD9': 0,
-    'Final': 600000
+    'Final MD9': 18420,
+    'Final': 581580
   };
   const nomesFases = Object.keys(fases).sort();
   if (nomesFases.length === 0) {
@@ -988,6 +1063,88 @@ function recalcularMedicacao() {
   flash('Medicações recalculadas!', true);
 }
 
+// ─── MORTALIDADE ─────────────────────────────────────────────────────────────
+function salvarMortalidade() {
+  const lote = getLoteAtual();
+  if (!lote) { flash('Nenhum lote selecionado.', false); return; }
+
+  const data = document.getElementById('morte-data').value;
+  if (!data) { flash('Informe a data.', false); return; }
+
+  let fase = document.getElementById('morte-fase').value;
+  if (fase === 'Outra') {
+    fase = document.getElementById('morte-fase-outra').value.trim();
+    if (!fase) { flash('Digite o nome da fase.', false); return; }
+  }
+
+  const qtd = Number(document.getElementById('morte-qtd').value);
+  if (!qtd || qtd <= 0) { flash('Informe uma quantidade válida.', false); return; }
+
+  const motivo = document.getElementById('morte-motivo').value.trim();
+
+  if (!Array.isArray(lote.mortes)) lote.mortes = [];
+  lote.mortes.push({
+    id: db.nextMorteId++,
+    data: data,
+    fase: fase,
+    quantidade: qtd,
+    motivo: motivo
+  });
+  saveDB();
+  renderizarTudo();
+  document.getElementById('morte-qtd').value = 1;
+  document.getElementById('morte-motivo').value = '';
+  flash('Mortalidade registrada.', true);
+}
+
+function renderizarMortalidade(lote) {
+  const tbody = document.getElementById('mortalidade-tbody');
+  const tfoot = document.getElementById('mortalidade-tfoot');
+  const mortes = lote.mortes || [];
+  if (mortes.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#8a9b9b;">Nenhum registro de mortalidade.</td></tr>';
+    tfoot.innerHTML = '';
+    return;
+  }
+  let html = '';
+  let total = 0;
+  mortes.forEach((m) => {
+    const qtd = Number(m.quantidade) || 0;
+    total += qtd;
+    html += `
+      <tr>
+        <td><input type="date" value="${m.data || ''}" onchange="atualizarMortalidade(${m.id}, 'data', this.value)"></td>
+        <td><input type="text" value="${m.fase || ''}" onchange="atualizarMortalidade(${m.id}, 'fase', this.value)"></td>
+        <td><input type="number" step="1" value="${qtd}" onchange="atualizarMortalidade(${m.id}, 'quantidade', this.value)"></td>
+        <td><input type="text" value="${m.motivo || ''}" onchange="atualizarMortalidade(${m.id}, 'motivo', this.value)"></td>
+        <td><button class="btn-acao secondary" style="font-size:18px;padding:6px 12px;" onclick="excluirMortalidade(${m.id})">🗑️</button></td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
+  tfoot.innerHTML = `<tr><td colspan="2" style="text-align:right;"><strong>TOTAL DE MORTES</strong></td><td><strong>${total.toLocaleString('pt-BR')}</strong></td><td colspan="2"></td></tr>`;
+}
+
+function atualizarMortalidade(id, campo, valor) {
+  const lote = getLoteAtual();
+  if (!lote) return;
+  const morte = (lote.mortes || []).find(m => m.id === id);
+  if (morte) {
+    morte[campo] = campo === 'quantidade' ? Number(valor) || 0 : valor;
+    saveDB();
+    renderizarTudo();
+  }
+}
+
+function excluirMortalidade(id) {
+  if (!confirm('Excluir este registro de mortalidade?')) return;
+  const lote = getLoteAtual();
+  if (!lote) return;
+  lote.mortes = (lote.mortes || []).filter(m => m.id !== id);
+  saveDB();
+  renderizarTudo();
+}
+
 // ─── ÚLTIMOS LANÇAMENTOS ────────────────────────────────────────────────────
 function renderizarUltimosLancamentos(lote) {
   const tbody = document.getElementById('ultimos-lancamentos');
@@ -1013,6 +1170,7 @@ function salvarConfigLote() {
   lote.pesoEntrada = Number(document.getElementById('cfg-pesoEntrada').value) || 0;
   lote.pesoVenda = Number(document.getElementById('cfg-pesoVenda').value) || 0;
   lote.idadeEntrada = Number(document.getElementById('cfg-idadeEntrada').value) || 0;
+  lote.quantidadeAnimais = Number(document.getElementById('cfg-qtdAnimais').value) || 0;
   saveDB();
   renderizarTudo();
   flash('Configurações salvas!', true);
@@ -1029,8 +1187,10 @@ function novoLote() {
     pesoEntrada: 0,
     pesoVenda: 0,
     idadeEntrada: 0,
+    quantidadeAnimais: 0,
     lancamentos: [],
-    medicacoes: []
+    medicacoes: [],
+    mortes: []
   };
   db.lotes.push(lote);
   saveDB();
@@ -1072,13 +1232,20 @@ function gerarRelatorioPeriodo(periodo) {
 
   const lancs = (lote.lancamentos || []).filter(l => {
     if (!l.data) return false;
-    const d = new Date(l.data);
+    const d = criarDataLocal(l.data);
     return d >= dataCorte && d <= agora;
   });
 
   const totalRacao = lancs.reduce((acc, l) => acc + (Number(l.quantidade) || 0), 0);
   const totalMedicado = (lote.medicacoes || []).reduce((acc, m) => acc + (Number(m.realizado) || 0), 0);
   const totalPrevMedic = (lote.medicacoes || []).reduce((acc, m) => acc + (Number(m.previsto) || 0), 0);
+
+  const mortesPeriodo = (lote.mortes || []).filter(m => {
+    if (!m.data) return false;
+    const d = criarDataLocal(m.data);
+    return d >= dataCorte && d <= agora;
+  });
+  const totalMortosPeriodo = mortesPeriodo.reduce((acc, m) => acc + (Number(m.quantidade) || 0), 0);
 
   const nomePeriodo = periodo === 'mensal' ? 'Mensal' : 'Semestral';
   const html = `
@@ -1093,10 +1260,11 @@ function gerarRelatorioPeriodo(periodo) {
       <div class="report-item"><div class="label">📊 Lançamentos</div><div class="value">${lancs.length}</div></div>
       <div class="report-item"><div class="label">💊 Medicado (kg)</div><div class="value">${totalMedicado.toLocaleString('pt-BR')}</div></div>
       <div class="report-item"><div class="label">📈 Previsto Medicado</div><div class="value">${totalPrevMedic.toLocaleString('pt-BR')}</div></div>
+      <div class="report-item"><div class="label">💀 Mortes no Período</div><div class="value">${totalMortosPeriodo.toLocaleString('pt-BR')}</div></div>
     </div>
   `;
   document.getElementById('report-output').innerHTML = html;
-  showTab('relatorios', document.querySelector('.tab-btn:nth-child(5)'));
+  showTab('relatorios', document.querySelectorAll('.tab-btn')[5]);
 }
 
 // ─── TABS ─────────────────────────────────────────────────────────────────────
@@ -1116,7 +1284,7 @@ function flash(msg, ok) {
   flash._t = setTimeout(() => { el.style.display = 'none'; }, 4000);
 }
 
-// ─── PWA: registra service worker para funcionar offline ─────────────────────
+// ─── PWA ─────────────────────────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(() => {});

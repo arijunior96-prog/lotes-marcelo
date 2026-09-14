@@ -1,5 +1,6 @@
-const CACHE = 'lotes-marcelo-v1';
+const CACHE = 'lotes-marcelo-v3';
 const FILES = [
+  './',
   './index.html',
   './manifest.json',
   './icon-192.png',
@@ -21,6 +22,15 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    caches.match(e.request).then(cached => {
+      const networkFetch = fetch(e.request).then(response => {
+        if (response && response.status === 200) {
+          const cacheCopy = response.clone();
+          caches.open(CACHE).then(cache => cache.put(e.request, cacheCopy));
+        }
+        return response;
+      }).catch(() => cached);
+      return cached || networkFetch;
+    })
   );
 });
